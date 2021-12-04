@@ -85,7 +85,7 @@ class BingoBoard(object):
         total_display = ""
         for row in self.data:
             for item in row:
-                total_display += f"*{item.value}*" if item.marked else f" {item.value} "
+                total_display += f"*{item.value:2}*" if item.marked else f" {item.value} "
                 total_display += " "
             total_display += "\n"
         return total_display
@@ -127,7 +127,7 @@ def main():
                 f"""
                     winning draw = {winning_number}
                     board =
-    {winning_board.display()}
+{winning_board.display()}
                     score = {sum(winning_board.get_unmarked_values()) * winning_number}
                 """
             )
