@@ -16,6 +16,7 @@ Position = namedtuple("Position", ["row", "column"])
 class BingoBoard(object):
     def __init__(self):
         self.data = []  # List[List[BingoItem]]
+        self.is_completed = False
 
     def add_row(self, data: List[int]):
         bingo_data = [BingoItem(d) for d in data]
@@ -108,26 +109,27 @@ def main():
             if board.is_populated:
                 boards.append(board)
 
-    winning_board = None  # type: Optional[BingoBoard]
-    winning_number = None  # type: Optional[int]
+
+    winning_boards = []  # type: List[Tuple[BingoBoard, int]]
     number_drawn = numbers_draw.popleft()
-    while winning_board is None and numbers_draw:
-        for board in boards:
+    while len(winning_boards) < len(boards) and numbers_draw:
+        remaining_boards = [b for b in boards if not b.is_completed]
+        for board in remaining_boards:
             board.mark_items_with_value(number_drawn)
             if board.bingo():
-                winning_board = board
-                winning_number = number_drawn
+                board.is_completed = True
+                winning_boards.append((board, number_drawn))
         number_drawn = numbers_draw.popleft()
 
-    if winning_board:
-        print(
-            f"""
-                winning draw = {winning_number}
-                board =
-{winning_board.display()}
-                score = {sum(winning_board.get_unmarked_values()) * winning_number}
-            """
-        )
-
+    if len(winning_boards):
+        for winning_board, winning_number in winning_boards:
+            print(
+                f"""
+                    winning draw = {winning_number}
+                    board =
+    {winning_board.display()}
+                    score = {sum(winning_board.get_unmarked_values()) * winning_number}
+                """
+            )
 
 main()
