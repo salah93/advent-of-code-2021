@@ -93,7 +93,6 @@ class BingoBoard(object):
 
 def main():
     boards = []  # type: List[BingoBoard]
-    numbers_draw = deque()  # type: List[int]
     pattern = re.compile(
         r"^(?P<first>(\d|\s)\d )(?P<second>(\d|\s)\d )(?P<third>(\d|\s)\d )(?P<fourth>(\d|\s)\d )(?P<fifth>(\d|\s)\d)$"
     )
