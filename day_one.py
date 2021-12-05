@@ -1,5 +1,5 @@
 # part 1
-measurments = [int(m) for m in open('inputs.txt')]
+measurments = [int(m) for m in open('data/inputs.txt')]
 initial = measurments[0]
 increases = 0
 for m in measurments[1:]:

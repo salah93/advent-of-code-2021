@@ -96,7 +96,7 @@ def main():
     pattern = re.compile(
         r"^(?P<first>(\d|\s)\d )(?P<second>(\d|\s)\d )(?P<third>(\d|\s)\d )(?P<fourth>(\d|\s)\d )(?P<fifth>(\d|\s)\d)$"
     )
-    with open("bingo.txt") as f:
+    with open("data/bingo.txt") as f:
         numbers_draw = deque([int(d) for d in next(f).split(",")])
         board = BingoBoard()
         for line in f:

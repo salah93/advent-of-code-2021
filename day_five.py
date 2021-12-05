@@ -121,7 +121,7 @@ class Grid(object):
 
 def main():
     grid = Grid()
-    with open("vents.txt") as f:
+    with open("data/vents.txt") as f:
         for line in f:
             start, end = line.split("->")
             start_pos = Position(*[int(pos) for pos in start.split(",")])

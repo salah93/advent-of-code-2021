@@ -53,7 +53,7 @@ def get_counter_for_index(data: List[str], index: int) -> Counter:
 
 def main():
     all_data = []  # type: List[str]
-    with open("diagnostics.txt") as f:
+    with open("data/diagnostics.txt") as f:
         for line in f:
             all_data.append(line.strip())
 

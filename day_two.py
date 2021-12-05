@@ -1,7 +1,7 @@
 ## part 1
 #forward = 0
 #down = 0
-#for line in open('depth.txt'):
+#for line in open('data/depth.txt'):
 #    command, value = line.split()
 #    if command == 'forward':
 #        forward += int(value)
@@ -17,7 +17,7 @@
 forward = 0
 depth = 0
 aim = 0
-for line in open('depth.txt'):
+for line in open('data/depth.txt'):
     command, value = line.split()
     if command == 'forward':
         forward += int(value)
