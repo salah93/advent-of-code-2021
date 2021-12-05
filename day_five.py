@@ -66,8 +66,7 @@ class LineIterator(Iterator):
         if self.reached_end:
             raise StopIteration
 
-        if self.curr_pos == self.line.end:
-            self.reached_end = True
+        self.reached_end = self.curr_pos == self.line.end
 
         next_pos = self.curr_pos
         self.curr_pos += self.increment
