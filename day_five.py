@@ -83,22 +83,21 @@ class Grid(object):
         return len(self.grid)
 
     def add_line(self, line: Line):
-        max_size = max([line.start.x, line.start.y, line.end.x, line.end.y])
-        if line.is_vertical or line.is_horizontal:
-            if len(self.grid) < max_size:
-                self._expand_grid(max_size)
-            for pos in line:
-                self.mark_position(pos)
+        max_size = max([line.start.x, line.start.y, line.end.x, line.end.y]) + 1
+        if len(self.grid) < max_size:
+            self._expand_grid(max_size)
+        for pos in line:
+            self.mark_position(pos)
 
     def mark_position(self, pos: Position):
         self.grid[pos.x][pos.y] += 1
 
     def _expand_grid(self, max_size: int):
-        for i in range(max_size + 1):
+        for i in range(max_size):
             try:
-                self.grid[i].extend([0] * (max_size + 1 - len(self.grid[i])))
+                self.grid[i].extend([0] * (max_size - len(self.grid[i])))
             except IndexError:
-                self.grid.append([0] * (max_size + 1))
+                self.grid.append([0] * (max_size))
 
     def display(self) -> str:
         grid = ""
