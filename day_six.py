@@ -1,6 +1,5 @@
 from collections import defaultdict
-from collections.abc import MutableMapping
-from typing import List, Optional
+from typing import List
 
 
 class Pond(object):
