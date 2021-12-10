@@ -20,25 +20,11 @@ class Marked(object):
         self.marked = marked
         self.height = height
 
-    def __eq__(self, other):
-        if isinstance(other, Marked):
-            eq = self.height == other.height
-        else:
-            eq = self.height == other
-        return eq
-
     def __repr__(self):
         return f"Marked<{self.height}>{'*' if self.marked else ''}"
 
-    def __lt__(self, other):
-        if isinstance(other, Marked):
-            lt = self.height < other.height
-        else:
-            lt = self.height < other
-        return lt
-
-    def __hash__(self):
-        return hash(self.height)
+    def pos_is_valid(self) -> bool:
+        return not self.marked and self.height != 9
 
 
 class Cave(Iterator):
@@ -96,9 +82,6 @@ class Cave(Iterator):
         for row_i, row in enumerate(self._grid):
             grid.append([Marked(marked=False, height=pos) for pos in row])
 
-        def pos_is_valid(pos: Marked) -> bool:
-            return not pos.marked and pos.height != 9
-
         def inner(row_i: int, col_j: int) -> List[Position]:
             """process row until end or reach a 9"""
             if row_i >= len(grid) or col_j >= len(grid) or row_i < 0 or col_j < 0:
@@ -111,22 +94,22 @@ class Cave(Iterator):
 
                 can_go_up = (row_i - 1) >= 0
                 if can_go_up:
-                    if pos_is_valid(grid[row_i - 1][col_j]):
+                    if grid[row_i - 1][col_j].pos_is_valid():
                         positions += inner(row_i - 1, col_j)
 
                 can_go_down = (row_i + 1) < len(grid)
                 if can_go_down:
-                    if pos_is_valid(grid[row_i + 1][col_j]):
+                    if grid[row_i + 1][col_j].pos_is_valid():
                         positions += inner(row_i + 1, col_j)
 
                 can_go_right = (col_j + 1) < len(grid)
                 if can_go_right:
-                    if pos_is_valid(grid[row_i][col_j + 1]):
+                    if grid[row_i][col_j + 1].pos_is_valid():
                         positions += inner(row_i, col_j + 1)
 
                 can_go_left = (col_j - 1) >= 0
                 if can_go_left:
-                    if pos_is_valid(grid[row_i][col_j - 1]):
+                    if grid[row_i][col_j - 1].pos_is_valid():
                         positions += inner(row_i, col_j - 1)
 
                 return positions
@@ -134,8 +117,8 @@ class Cave(Iterator):
         basins = []  # type: List[List[int]]
         for row_i in range(len(grid)):
             for col_j in range(len(grid)):
-                pos = grid[row_i][col_j]
-                if pos.marked or pos.height == 9:
+                mark = grid[row_i][col_j]
+                if not mark.pos_is_valid():
                     continue
                 else:
                     basin = list(inner(row_i, col_j))
@@ -156,9 +139,7 @@ def main():
     print(f"sum of risk levels = {len(low_points) + sum(low_points)}")
     basins = cave.get_basins()
     sum_of_basins = sorted([len(basin) for basin in basins], reverse=True)
-    print(
-            f"product of basins = {reduce(lambda a, b: a * b, sum_of_basins[:3], 1)}"
-    )
+    print(f"product of basins = {reduce(lambda a, b: a * b, sum_of_basins[:3], 1)}")
 
 
 main()
