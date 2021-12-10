@@ -16,12 +16,10 @@ class Entry(object):
         bottom = set()
         # [0, 6, 9]
         for pattern in self.patterns_with_six_segments():
-            if self.pattern_one() and len(self.pattern_one() - pattern):
+            if len(self.pattern_one() - pattern):
                 top_right = self.pattern_one() - pattern
                 bottom_right = self.pattern_one() - top_right
-            if self.segments_in_bottom_left_and_bottom() and len(
-                self.segments_in_bottom_left_and_bottom() - pattern
-            ):
+            if len(self.segments_in_bottom_left_and_bottom() - pattern):
                 bottom_left = self.segments_in_bottom_left_and_bottom() - pattern
                 bottom = self.segments_in_bottom_left_and_bottom() - bottom_left
 
@@ -29,16 +27,10 @@ class Entry(object):
         middle = set()
         # [2, 3, 5]
         for pattern in self.patterns_with_five_segments():
-            if self.segments_in_top_left_and_middle() and len(
-                self.segments_in_top_left_and_middle() - pattern
-            ):
+            if len(self.segments_in_top_left_and_middle() - pattern):
                 top_left = self.segments_in_top_left_and_middle() - pattern
                 middle = self.segments_in_top_left_and_middle() - top_left
-            if (
-                not bottom
-                and self.segments_in_bottom_left_and_bottom()
-                and len(self.segments_in_bottom_left_and_bottom() - pattern)
-            ):
+            if not bottom and len(self.segments_in_bottom_left_and_bottom() - pattern):
                 bottom_left = self.segments_in_bottom_left_and_bottom() - pattern
                 bottom = self.segments_in_bottom_left_and_bottom() - bottom_left
 
@@ -117,24 +109,13 @@ class Entry(object):
         return is_valid
 
     def segments_in_top(self) -> Set[str]:
-        top_segment = set()
-        if self.pattern_one() and self.pattern_seven():
-            top_segment = self.pattern_seven() - self.pattern_one()
-        return top_segment
+        return self.pattern_seven() - self.pattern_one()
 
     def segments_in_top_left_and_middle(self) -> Set[str]:
-        values = set()
-        if self.pattern_four() and self.pattern_one():
-            values = self.pattern_four() - self.pattern_one()
-        return values
+        return self.pattern_four() - self.pattern_one()
 
     def segments_in_bottom_left_and_bottom(self) -> Set[str]:
-        values = set()
-        if self.segments_in_top() and self.pattern_four() and self.pattern_eight():
-            values = self.pattern_eight() - (
-                self.segments_in_top() | self.pattern_four()
-            )
-        return values
+        return self.pattern_eight() - (self.segments_in_top() | self.pattern_four())
 
     def patterns_with_five_segments(self) -> List[Set[str]]:
         return self._pattern(5)
@@ -150,11 +131,7 @@ class Entry(object):
         .   f
         . . .
         """
-        try:
-            values = self._pattern(2)[0]
-        except IndexError:
-            values = set()
-        return values
+        return self._pattern(2)[0]
 
     def pattern_four(self) -> Set[str]:
         """
@@ -164,11 +141,7 @@ class Entry(object):
         .   f
         . . .
         """
-        try:
-            values = self._pattern(4)[0]
-        except IndexError:
-            values = set()
-        return values
+        return self._pattern(4)[0]
 
     def pattern_seven(self) -> Set[str]:
         """
@@ -178,11 +151,7 @@ class Entry(object):
         .   f
         . . .
         """
-        try:
-            values = self._pattern(3)[0]
-        except IndexError:
-            values = set()
-        return values
+        return self._pattern(3)[0]
 
     def pattern_eight(self) -> Set[str]:
         """
@@ -192,11 +161,7 @@ class Entry(object):
         e   f
         g g g
         """
-        try:
-            values = self._pattern(7)[0]
-        except IndexError:
-            values = set()
-        return values
+        return self._pattern(7)[0]
 
     def _pattern(self, i: int) -> List[Set[str]]:
         return [
