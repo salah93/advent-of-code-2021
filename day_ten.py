@@ -47,6 +47,7 @@ def main():
                 elif is_closing_character(character):
                     if not characters_match(stack, character):
                         illegal_characters.append(character)
+                        break
                 else:
                     raise IllegalCharacter
     points = convert_characters_to_points(illegal_characters)
