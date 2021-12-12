@@ -61,13 +61,13 @@ class Graph(object):
         path: List[Cave],
         all_paths: List[List[Cave]],
     ) -> List[List[Cave]]:
-        if self._part_two_clause(cave, path):
-            return all_paths
         path = path + [cave]
         if cave == END:
             return all_paths + [path]
         else:
             for next_cave in self._edges[cave]:
+                if self._part_two_clause(next_cave, path):
+                    continue
                 all_paths = self.explore_cave(next_cave, path, all_paths)
             return all_paths
 
