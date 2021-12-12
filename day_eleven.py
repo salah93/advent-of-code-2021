@@ -23,7 +23,7 @@ class Cavern(object):
             for j in range(len(self._cavern[i])):
                 self._cavern[i][j] += 1
 
-    def _step_two(self):
+    def _step_two(self) -> Set[Tuple[int, int]]:
         coords_that_flashed = set()  # type: Set[Tuple[int, int]]
         for i in range(len(self._cavern)):
             for j in range(len(self._cavern[i])):
@@ -84,7 +84,7 @@ def main():
 
     flashes = 0
     step = 0
-    while flashes != cavern.get_total_octopuses():
+    while flashes < cavern.get_total_octopuses():
         flashes = len(cavern.step())
         step += 1
 
