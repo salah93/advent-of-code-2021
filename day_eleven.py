@@ -8,6 +8,12 @@ class Cavern(object):
     def add_row(self, row: List[int]):
         self._cavern.append(row)
 
+    def get_total_octopuses(self) -> int:
+        total = 0
+        for row in self._cavern:
+            total += len(row)
+        return total
+
     def step(self) -> Set[Tuple[int, int]]:
         self._step_one()
         return self._step_two()
@@ -66,14 +72,23 @@ def main():
         for line in f:
             cavern.add_row([int(o) for o in line.strip()])
 
+    # part 1
+    # flashes = 0
+    # steps = 100
+    # for i in range(1, steps + 1):
+    #    current_flashes = len(cavern.step())
+    #    print(f"total flashes after step {i} steps is {current_flashes}")
+    #    # print(cavern.display())
+    #    flashes += current_flashes
+    # print(f"total flashes after {steps} steps is {flashes}")
+
     flashes = 0
-    steps = 100
-    for i in range(1, steps + 1):
-        current_flashes = len(cavern.step())
-        print(f"total flashes after step {i} steps is {current_flashes}")
-        # print(cavern.display())
-        flashes += current_flashes
-    print(f"total flashes after {steps} steps is {flashes}")
+    step = 0
+    while flashes != cavern.get_total_octopuses():
+        flashes = len(cavern.step())
+        step += 1
+
+    print(f"synchronized flashes happen at step {step}")
 
 
 main()
