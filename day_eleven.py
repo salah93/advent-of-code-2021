@@ -27,8 +27,6 @@ class Cavern(object):
     def _process(
         self, i: int, j: int, coords_that_flashed: Set[Tuple[int, int]]
     ) -> Set[Tuple[int, int]]:
-        if (i, j) in coords_that_flashed:
-            return coords_that_flashed
         if self._cavern[i][j] > 9:
             return self._flash(i, j, coords_that_flashed | set([(i, j)]))
         return coords_that_flashed
