@@ -62,12 +62,12 @@ class Cavern(object):
 
 def main():
     cavern = Cavern()
-    with open("data/octopuses_test.txt") as f:
+    with open("data/octopuses.txt") as f:
         for line in f:
             cavern.add_row([int(o) for o in line.strip()])
 
     flashes = 0
-    steps = 10
+    steps = 100
     for i in range(1, steps + 1):
         current_flashes = len(cavern.step())
         print(f"total flashes after step {i} steps is {current_flashes}")
