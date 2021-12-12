@@ -40,13 +40,28 @@ class Graph(object):
             all_paths=[],
         )
 
+    def _part_two_clause(self, cave: Cave, path: List[Cave]) -> bool:
+        can_not_pass = False
+        if cave == START and len(path) > 0:
+            can_not_pass = True
+        elif cave.is_small:
+            cave_counts = {c: path.count(c) for c in path if c.is_small}
+            already_visited_small_cave_twice = any(
+                [count == 2 for count in cave_counts.values()]
+            )
+            can_not_pass = already_visited_small_cave_twice and cave in path
+        return can_not_pass
+
+    def _part_one_clause(self, cave: Cave, path: List[Cave]) -> bool:
+        return cave.is_small and path.count(cave) >= 1
+
     def explore_cave(
         self,
         cave: Cave,
         path: List[Cave],
         all_paths: List[List[Cave]],
     ) -> List[List[Cave]]:
-        if cave.is_small and cave in path:
+        if self._part_two_clause(cave, path):
             return all_paths
         path = path + [cave]
         if cave == END:
@@ -67,7 +82,7 @@ def main():
             ]  # type: List[Cave]
             g.add_caves_from(caves)
             g.add_edge(caves[0], caves[1])
-    paths = g.get_paths()
+    paths = sorted([",".join([c.name for c in path]) for path in g.get_paths()])
     print(f"total paths = {len(paths)}")
 
 
