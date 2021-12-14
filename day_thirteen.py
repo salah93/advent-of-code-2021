@@ -75,7 +75,7 @@ class Grid(object):
 def main():
     folds = []  # type: List[Fold]
     grid = Grid()
-    with open("data/dots_test.txt") as f:
+    with open("data/dots.txt") as f:
         for line in f:
             if line.startswith("fold"):
                 xy, increment = line.strip().split()[-1].split("=")
@@ -83,11 +83,11 @@ def main():
             elif line.strip():
                 pos = Position(*[int(i) for i in line.strip().split(",")])
                 grid.mark_position(pos)
-    print(grid.display())
-
     grid.fold(folds[0])
-    print(grid.display())
     print(f"count = {grid.number_of_dots_visible()}")
+    for fold in folds[1:]:
+        grid.fold(fold)
+    print(grid.display())
 
 
 main()
