@@ -27,6 +27,7 @@ def main():
             index = template.find(pattern)
             while index > -1:
                 updates[index] = insert
+                index = template.find(pattern, index + 1)
         new_template = ""
         for i, char in enumerate(template):
             new_template += char
