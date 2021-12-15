@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from collections import Counter
+from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
 
 
@@ -8,6 +8,13 @@ def get_args():
     parser.add_argument("-S", "--steps", type=int, default=1)
     parser.add_argument("-F", "--file", required=True)
     return parser.parse_args()
+
+
+def get_template_dict_from_template(template: str) -> Dict[str, List[int]]:
+    template_dict = defaultdict(list)  # type: Dict[str, List[int]]
+    for i in range(len(template) - 1):
+        template_dict[template[i] + template[i + 1]].append(i)
+    return template_dict
 
 
 def main():
@@ -20,12 +27,12 @@ def main():
                 pattern, insert = line.strip().split("->")
                 pair_insertion_rules.append((pattern.strip(), insert.strip()))
 
+    template_dict = get_template_dict_from_template(template)
     print(f"template = {template}")
     for step in range(1, args.steps + 1):
         updates = {}  # type: Dict[int, str]
         for pattern, insert in pair_insertion_rules:
-            index = template.find(pattern)
-            while index > -1:
+            for index in template_dict.get(pattern, []):
                 updates[index] = insert
                 index = template.find(pattern, index + 1)
         new_template = ""
@@ -34,6 +41,7 @@ def main():
             if i in updates:
                 new_template += updates[i]
         template = new_template
+        template_dict = get_template_dict_from_template(template)
     counter = Counter(template)
     most_common_list = counter.most_common()
     most_common = most_common_list[0]
