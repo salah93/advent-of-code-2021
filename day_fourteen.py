@@ -34,7 +34,6 @@ def main():
         for pattern, insert in pair_insertion_rules:
             for index in template_dict.get(pattern, []):
                 updates[index] = insert
-                index = template.find(pattern, index + 1)
         new_template = ""
         for i, char in enumerate(template):
             new_template += char
