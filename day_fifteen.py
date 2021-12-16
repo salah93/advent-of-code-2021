@@ -17,6 +17,10 @@ class MissingNode(Exception):
     pass
 
 
+class PathNotFound(Exception):
+    pass
+
+
 class Network(object):
     def __init__(self):
         self._nodes = set()  # type: Set[Node]
@@ -38,7 +42,7 @@ class Network(object):
                 display += "\n"
         return display
 
-    def get_shortest_path(self, start: Node, end: Node) -> List[Edge]:
+    def get_shortest_path(self, start: Node, end: Node) -> Tuple[int, List[Edge]]:
         distances = {}  # type: Dict[Node, Tuple[float, List[Edge]]]
         for node in self._nodes:
             distances[node] = (float("inf"), [])
@@ -49,9 +53,10 @@ class Network(object):
                 distances, unvisited_nodes
             )
             if node_with_min_distance == end:
-                return distances[node_with_min_distance][1]
+                return distances[node_with_min_distance]
             unvisited_nodes = unvisited_nodes - {node_with_min_distance}
             self._explore_node(node_with_min_distance, distances)
+        raise PathNotFound
 
     def _get_node_with_min_distance(
         self,
@@ -109,8 +114,9 @@ def main():
                 if i + 1 < len(grid):
                     bottom_node = Node(x=i + 1, y=j)
                     network.add_edge(bottom_node, this_node, weight)
-        shortest_path = network.get_shortest_path(START, END)
-        print(network.get_cost_of_path(shortest_path))
+        # part 1
+        distance, shortest_path = network.get_shortest_path(START, END)
+        print(distance)
 
 
 main()
