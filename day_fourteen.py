@@ -2,6 +2,8 @@ from argparse import ArgumentParser
 from collections import Counter, defaultdict
 from typing import Dict, List, Tuple
 
+import copy
+
 
 def get_args():
     parser = ArgumentParser()
@@ -20,41 +22,29 @@ def main():
                 pattern, insert = line.strip().split("->")
                 pair_insertion_rules.append((pattern.strip(), insert.strip()))
 
-    template_dict = defaultdict(list)  # type: Dict[str, List[int]]
+    template_dict = defaultdict(int)  # type: Dict[str, List[int]]
     for i in range(len(template) - 1):
-        template_dict[template[i] + template[i + 1]].append(i)
+        template_dict[template[i] + template[i + 1]] += 1
+    new_template_dict = copy.deepcopy(template_dict)
 
     print(f"template = {template}")
     for step in range(1, args.steps + 1):
         print(f"step {step}")
-        updates = {}  # type: Dict[int, str]
         for pattern, insert in pair_insertion_rules:
-            for index in template_dict.get(pattern, []):
-                updates[index] = insert
-        new_template_dict = defaultdict(list)
-        for pattern, indices in template_dict.items():
-            for i in indices:
-                chars_inserted_before_this_point = len(
-                    [update_i for update_i in updates if update_i < i]
-                )
-                if i in updates:
-                    new_template_dict[pattern[0] + updates[i]].append(
-                        i + chars_inserted_before_this_point
-                    )
-                    new_template_dict[updates[i] + pattern[1]].append(
-                        i + 1 + chars_inserted_before_this_point
-                    )
-                else:
-                    new_template_dict[pattern].append(
-                        i + chars_inserted_before_this_point
-                    )
-        template_dict = new_template_dict
+            if pattern in template_dict:
+                new_template_dict[pattern[0] + insert] += template_dict[pattern]
+                new_template_dict[insert + pattern[1]] += template_dict[pattern]
+                new_template_dict[pattern] -= template_dict[pattern]
+                if new_template_dict[pattern] <= 0:
+                    new_template_dict.pop(pattern)
+        template_dict = copy.deepcopy(new_template_dict)
+
     print("done")
     counter = Counter()
-    for pattern, indices in template_dict.items():
-        for i in indices:
-            counter[pattern[0]] += 1
-    counter[pattern[1]] += 1
+    for pattern, count in template_dict.items():
+        counter[pattern[0]] += count
+    counter[template[-1]] += 1
+
     most_common_list = counter.most_common()
     most_common = most_common_list[0]
     least_common = most_common_list[-1]
