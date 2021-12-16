@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Dict, List, NamedTuple, Set
+from typing import Dict, List, NamedTuple, Set, Tuple
 
 
 class Node(NamedTuple):
@@ -39,41 +39,42 @@ class Network(object):
         return display
 
     def get_shortest_path(self, start: Node, end: Node) -> List[Edge]:
-        distances = {}  # type: Dict[Node, List[Edge]]
+        distances = {}  # type: Dict[Node, Tuple[float, List[Edge]]]
         for node in self._nodes:
-            distances[node] = [Edge(float("inf"), None, None)]
-        distances[start] = []
+            distances[node] = (float("inf"), [])
+        distances[start] = (0, [])
         unvisited_nodes = self._nodes
         while unvisited_nodes:
             node_with_min_distance = self._get_node_with_min_distance(
                 distances, unvisited_nodes
             )
             if node_with_min_distance == end:
-                return distances[node_with_min_distance]
+                return distances[node_with_min_distance][1]
             unvisited_nodes = unvisited_nodes - {node_with_min_distance}
             self._explore_node(node_with_min_distance, distances)
 
     def _get_node_with_min_distance(
-        self, distances: Dict[Node, List[Edge]], unvisited_nodes: Set[Node]
+        self,
+        distances: Dict[Node, Tuple[float, List[Edge]]],
+        unvisited_nodes: Set[Node],
     ) -> Node:
-        node_with_min_distance = (None, float("inf"))
-        for node in distances:
+        min_node = (float("inf"), None)
+        for node, (distance, path) in distances.items():
             if node in unvisited_nodes:
-                distance = self.get_cost_of_path(distances[node])
-                if distance < node_with_min_distance[1]:
-                    node_with_min_distance = (node, distance)
-        return node_with_min_distance[0]
+                if distance < min_node[0]:
+                    min_node = (distance, node)
+        return min_node[1]
 
     def get_cost_of_path(self, path: List[Edge]) -> int:
         return sum([e.weight for e in path])
 
     def _explore_node(self, node: Node, distances: Dict[Node, float]):
-        total_distance_for_node = self.get_cost_of_path(distances[node])
         for edge in self._edges[node]:
-            if (total_distance_for_node + edge.weight) < self.get_cost_of_path(
-                distances[edge.node_b]
-            ):
-                distances[edge.node_b] = distances[node] + [edge]
+            if (distances[node][0] + edge.weight) < distances[edge.node_b][0]:
+                distances[edge.node_b] = (
+                    (distances[node][0] + edge.weight),
+                    distances[node][1] + [edge],
+                )
 
 
 def main():
