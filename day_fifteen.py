@@ -82,20 +82,24 @@ class Network(object):
                 )
 
 
-def main():
-    network = Network()
-    with open("data/path_test.txt") as f:
-        grid = []  # type: List[List[int]]
-        for i, line in enumerate(f):
-            grid.append([])
-            for j, weight in enumerate(line.strip()):
-                grid[-1].append(int(weight))
+class Grid(object):
+    def __init__(self):
+        self._grid = []  # type: List[List[int]]
+
+    def add_row(self, row: List[int]):
+        self._grid.append(row)
+
+    def get_dimensions(self) -> Tuple[int, int]:
+        length = len(self._grid)
+        width = len(self._grid[0]) if length else 0
+        return (length, width)
+
+    def get_network(self) -> Network:
+        network = Network()
+        for i, row in enumerate(self._grid):
+            for j, weight in enumerate(row):
                 network.add_node(Node(x=i, y=j))
-
-        START = Node(0, 0)
-        END = Node(len(grid) - 1, len(grid[-1]) - 1)
-
-        for i, row in enumerate(grid):
+        for i, row in enumerate(self._grid):
             for j, weight in enumerate(row):
                 this_node = Node(x=i, y=j)
 
@@ -111,12 +115,58 @@ def main():
                     top_node = Node(x=i - 1, y=j)
                     network.add_edge(top_node, this_node, weight)
 
-                if i + 1 < len(grid):
+                if i + 1 < len(self._grid):
                     bottom_node = Node(x=i + 1, y=j)
                     network.add_edge(bottom_node, this_node, weight)
-        # part 1
-        distance, shortest_path = network.get_shortest_path(START, END)
-        print(distance)
+        return network
+
+
+def main():
+    grid = Grid()
+    with open("data/path_test.txt") as f:
+        for i, line in enumerate(f):
+            grid.add_row([int(weight) for weight in line.strip()])
+
+    # part 1
+    network = grid.get_network()
+    START = Node(0, 0)
+    length, width = grid.get_dimensions()
+    END = Node(length - 1, width - 1)
+    distance, shortest_path = network.get_shortest_path(START, END)
+    print(distance)
+
+    # part 2
+    # expand grid to be 5 times larger
+    # length = len(grid)
+    # width = len(grid[0])
+    # for m_i in range(1, 5):
+    #    for m_j in range(1, 5):
+    #        for i in range(len(grid)):
+    #            row = grid[i]
+    #            for j in range(len(row)):
+    #                grid[i].append(max((grid[i][j] + m_j) % 10, 1))
+    # length_size = len(grid) * 5
+    # width_size = len(grid[0]) * 5
+    # for i in range(length_size):
+    #    try:
+    #        grid[i] = grid[i]
+    #    except IndexError:
+    #        grid[i] = []
+    #    for j in range(width_size):
+    #        try:
+    #            grid[i][j] = grid[i][j]
+    #        except IndexError:
+    #            grid[i].append()
+    #    try:
+    #        row_size = width_size - len(grid[i])
+    #        grid[i].extend([0] * row_size)
+    #    except IndexError:
+    #        grid.append([0] * width_size)
+
+    # for i in range(5):
+    #    for j in range(5):
+    #        if i == j == 0:
+    #            continue
 
 
 main()
