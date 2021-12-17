@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from collections import defaultdict
-from typing import Dict, List, NamedTuple, Set, Tuple
+from typing import Dict, List, NamedTuple, Optional, Set, Tuple
+
+import copy
 
 
 class Node(NamedTuple):
@@ -83,8 +87,8 @@ class Network(object):
 
 
 class Grid(object):
-    def __init__(self):
-        self._grid = []  # type: List[List[int]]
+    def __init__(self, grid: Optional[List[List[int]]] = None):
+        self._grid = grid or []  # type: List[List[int]]
 
     def add_row(self, row: List[int]):
         self._grid.append(row)
@@ -120,53 +124,63 @@ class Grid(object):
                     network.add_edge(bottom_node, this_node, weight)
         return network
 
+    def display(self) -> str:
+        display = ""
+        for row in self._grid:
+            for weight in row:
+                display += f" {weight} "
+            display += "\n"
+        return display
+
+    def get_expanded_grid(self, multiple: int) -> Grid:
+        """expand grid to be `multiple` times larger"""
+        length, width = self.get_dimensions()
+
+        def get_weight(w):
+            return (w % 9) or 9
+
+        new_grid = copy.deepcopy(self._grid)
+        for row_i in range(length):
+            for add in range(1, multiple):
+                row = [get_weight(weight + add) for weight in self._grid[row_i]]
+                new_grid[row_i].extend(row)
+
+        for add in range(1, multiple):
+            for row_i in range(length):
+                new_grid.append(
+                    [get_weight(weight + add) for weight in new_grid[row_i]]
+                )
+        return Grid(new_grid)
+
 
 def main():
     grid = Grid()
-    with open("data/path_test.txt") as f:
+    with open("data/path.txt") as f:
         for i, line in enumerate(f):
             grid.add_row([int(weight) for weight in line.strip()])
 
     # part 1
-    network = grid.get_network()
-    START = Node(0, 0)
-    length, width = grid.get_dimensions()
-    END = Node(length - 1, width - 1)
-    distance, shortest_path = network.get_shortest_path(START, END)
-    print(distance)
+    # network = grid.get_network()
+    # START = Node(0, 0)
+    # length, width = grid.get_dimensions()
+    # END = Node(length - 1, width - 1)
+    # distance, shortest_path = network.get_shortest_path(START, END)
+    # print(distance)
 
     # part 2
-    # expand grid to be 5 times larger
-    # length = len(grid)
-    # width = len(grid[0])
-    # for m_i in range(1, 5):
-    #    for m_j in range(1, 5):
-    #        for i in range(len(grid)):
-    #            row = grid[i]
-    #            for j in range(len(row)):
-    #                grid[i].append(max((grid[i][j] + m_j) % 10, 1))
-    # length_size = len(grid) * 5
-    # width_size = len(grid[0]) * 5
-    # for i in range(length_size):
-    #    try:
-    #        grid[i] = grid[i]
-    #    except IndexError:
-    #        grid[i] = []
-    #    for j in range(width_size):
-    #        try:
-    #            grid[i][j] = grid[i][j]
-    #        except IndexError:
-    #            grid[i].append()
-    #    try:
-    #        row_size = width_size - len(grid[i])
-    #        grid[i].extend([0] * row_size)
-    #    except IndexError:
-    #        grid.append([0] * width_size)
-
-    # for i in range(5):
-    #    for j in range(5):
-    #        if i == j == 0:
-    #            continue
+    new_grid = grid.get_expanded_grid(5)
+    print(new_grid.display())
+    network = new_grid.get_network()
+    START = Node(0, 0)
+    length, width = new_grid.get_dimensions()
+    END = Node(length - 1, width - 1)
+    number_of_edges = 0
+    for n, edges in network._edges.items():
+        number_of_edges += len(edges)
+    print(f'number of edges = {number_of_edges}')
+    print(f'number of nodes = {len(network._nodes)}')
+    distance, shortest_path = network.get_shortest_path(START, END)
+    print(distance)
 
 
 main()
