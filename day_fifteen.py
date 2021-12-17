@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Dict, List, NamedTuple, Optional, Set, Tuple
 
 import copy
+import heapq
 
 
 class Node(NamedTuple):
@@ -49,39 +50,36 @@ class Network(object):
     def get_shortest_path(self, start: Node, end: Node) -> Tuple[int, List[Edge]]:
         distances = {}  # type: Dict[Node, Tuple[float, List[Edge]]]
         distances[start] = (0, [])
-        unvisited_nodes = self._nodes
-        while unvisited_nodes:
-            node_with_min_distance = self._get_node_with_min_distance(
-                distances, unvisited_nodes
-            )
+        heap = []
+        heapq.heappush(heap, (0, start))
+        visited_nodes = set()
+        while heap:
+            _, node_with_min_distance = heapq.heappop(heap)
             if node_with_min_distance == end:
                 return distances[node_with_min_distance]
-            unvisited_nodes = unvisited_nodes - {node_with_min_distance}
-            self._explore_node(node_with_min_distance, distances)
+            visited_nodes.add(node_with_min_distance)
+            self._explore_node(node_with_min_distance, distances, visited_nodes, heap)
         raise PathNotFound
 
-    def _get_node_with_min_distance(
+    def _explore_node(
         self,
-        distances: Dict[Node, Tuple[float, List[Edge]]],
-        unvisited_nodes: Set[Node],
-    ) -> Node:
-        min_node = (float("inf"), None)
-        for node, (distance, path) in distances.items():
-            if node in unvisited_nodes:
-                if distance < min_node[0]:
-                    min_node = (distance, node)
-        return min_node[1]
-
-    def get_cost_of_path(self, path: List[Edge]) -> int:
-        return sum([e.weight for e in path])
-
-    def _explore_node(self, node: Node, distances: Dict[Node, float]):
+        node: Node,
+        distances: Dict[Node, float],
+        visited_nodes: Set[Node],
+        heap: List[Tuple[int, Node]],
+    ):
         for edge in self._edges[node]:
-            if (distances[node][0] + edge.weight) < distances.get(edge.node_b, (float("inf"), None))[0]:
-                distances[edge.node_b] = (
-                    (distances[node][0] + edge.weight),
-                    distances[node][1] + [edge],
-                )
+            if edge.node_b not in visited_nodes:
+                if (distances[node][0] + edge.weight) < distances.get(
+                    edge.node_b, (float("inf"), None)
+                )[0]:
+                    distances[edge.node_b] = (
+                        (distances[node][0] + edge.weight),
+                        distances[node][1] + [edge],
+                    )
+                    heapq.heappush(
+                        heap, ((distances[node][0] + edge.weight), edge.node_b)
+                    )
 
 
 class Grid(object):
@@ -175,8 +173,8 @@ def main():
     number_of_edges = 0
     for n, edges in network._edges.items():
         number_of_edges += len(edges)
-    print(f'number of edges = {number_of_edges}')
-    print(f'number of nodes = {len(network._nodes)}')
+    print(f"number of edges = {number_of_edges}")
+    print(f"number of nodes = {len(network._nodes)}")
     distance, shortest_path = network.get_shortest_path(START, END)
     print(distance)
 
