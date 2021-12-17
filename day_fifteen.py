@@ -48,8 +48,6 @@ class Network(object):
 
     def get_shortest_path(self, start: Node, end: Node) -> Tuple[int, List[Edge]]:
         distances = {}  # type: Dict[Node, Tuple[float, List[Edge]]]
-        for node in self._nodes:
-            distances[node] = (float("inf"), [])
         distances[start] = (0, [])
         unvisited_nodes = self._nodes
         while unvisited_nodes:
@@ -79,7 +77,7 @@ class Network(object):
 
     def _explore_node(self, node: Node, distances: Dict[Node, float]):
         for edge in self._edges[node]:
-            if (distances[node][0] + edge.weight) < distances[edge.node_b][0]:
+            if (distances[node][0] + edge.weight) < distances.get(edge.node_b, (float("inf"), None))[0]:
                 distances[edge.node_b] = (
                     (distances[node][0] + edge.weight),
                     distances[node][1] + [edge],
@@ -155,7 +153,7 @@ class Grid(object):
 
 def main():
     grid = Grid()
-    with open("data/path.txt") as f:
+    with open("data/path_test.txt") as f:
         for i, line in enumerate(f):
             grid.add_row([int(weight) for weight in line.strip()])
 
