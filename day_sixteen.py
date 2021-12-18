@@ -1,4 +1,9 @@
+from functools import reduce
 from typing import List, Tuple
+
+
+class InvalidType(Exception):
+    pass
 
 
 class Packet(object):
@@ -53,6 +58,39 @@ class Packet(object):
             total += packet.get_sum_of_versions()
         return total
 
+    def calculate(self) -> int:
+        if self.type_id == 0:
+            return sum([p.calculate() for p in self.sub_packets])
+        elif self.type_id == 1:
+            return reduce(
+                lambda a, b: a * b, [p.calculate() for p in self.sub_packets], 1
+            )
+        elif self.type_id == 2:
+            return min([p.calculate() for p in self.sub_packets])
+        elif self.type_id == 3:
+            return max([p.calculate() for p in self.sub_packets])
+        elif self.type_id == 5:
+            return (
+                1
+                if self.sub_packets[0].calculate() > self.sub_packets[1].calculate()
+                else 0
+            )
+        elif self.type_id == 6:
+            return (
+                1
+                if self.sub_packets[0].calculate() < self.sub_packets[1].calculate()
+                else 0
+            )
+        elif self.type_id == 7:
+            return (
+                1
+                if self.sub_packets[0].calculate() == self.sub_packets[1].calculate()
+                else 0
+            )
+
+        else:
+            raise InvalidType
+
 
 class PacketTypeFour(Packet):
     def __init__(self, version: int, bits: int, number: int):
@@ -73,6 +111,9 @@ class PacketTypeFour(Packet):
 
     def __repr__(self) -> str:
         return f"Packet(version={self.version}, type_id={self.type_id}, number={self.number}, subpackets={self.sub_packets})"
+
+    def calculate(self) -> int:
+        return self.number
 
 
 def parse_packet(
@@ -121,6 +162,10 @@ def main():
             print(
                 f"packet version sum for {hexadecimal.strip()} = {packet.get_sum_of_versions()}"
             )
+            print(
+                f"packet version calculation for {hexadecimal.strip()} = {packet.calculate()}"
+            )
+            print()
 
 
 main()
