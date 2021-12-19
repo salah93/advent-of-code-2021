@@ -13,11 +13,16 @@ def point_missed_target(point: Point, target: Polygon) -> bool:
     return point.y < miny
 
 
+def target_contains_point(point: Point, target: Polygon) -> bool:
+    (minx, miny, maxx, maxy) = target.bounds
+    return point.x <= maxx and point.x >= minx and point.y <= maxy and point.y >= miny
+
+
 def trajectory_hits_target(slope: Slope, target: Polygon) -> Tuple[bool, List[Point]]:
     def inner(point: Point, slope: Slope, path: List[Point]) -> bool:
         # if point == Point(21, -10):
         #    import pdb; pdb.set_trace()
-        if target.intersects(point.buffer(0.5)):
+        if target_contains_point(point, target):
             return True, path
         elif point_missed_target(point, target):
             return False, path
@@ -37,7 +42,6 @@ def trajectory_hits_target(slope: Slope, target: Polygon) -> Tuple[bool, List[Po
 def main():
     with open("data/target.txt") as f:
         target_area = f.read().strip()
-        "target area: x=20..30, y=-10..-5"
         x_area, y_area = target_area.lstrip("target area: ").split(", ")
         min_x, max_x = (int(x) for x in x_area[2:].split(".."))
         min_y, max_y = (int(y) for y in y_area[2:].split(".."))
@@ -53,11 +57,23 @@ def main():
     # 17! is 153 meaning it will not move further rightward at point 153
     # 19! is 190 meaning it will not move further rightward at point 153
     # 113 was trial and error tbh
-    slope = Slope(17, 113)
-    hits, path = trajectory_hits_target(slope, target)
-    if hits:
-        print(f"Slope {slope} hits target area {target}")
-        print(f"max is {max([p.y for p in path])}")
+    # slope = Slope(17, 113)
+    # hits, path = trajectory_hits_target(slope, target)
+    # if hits:
+    #    print(f"Slope {slope} hits target area {target}")
+    #    print(f"max is {max([p.y for p in path])}")
+
+    # 19! is 190 meaning it will not move further rightward at point 153
+    slopes_that_hit = []
+    (_, miny, maxx, maxy) = target.bounds
+    for x in range(int(maxx) + 1):
+        print(f"{x} of {maxx}")
+        for y in range(int(miny), int(abs(miny)) + 1):
+            slope = Slope(x, y)
+            hits, path = trajectory_hits_target(slope, target)
+            if hits:
+                slopes_that_hit.append(slope)
+    print(f"number of slopes that hit are {len(slopes_that_hit)}")
 
 
 main()
