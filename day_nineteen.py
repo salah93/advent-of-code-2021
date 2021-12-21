@@ -140,41 +140,35 @@ def main():
             if len(mappings) == len(scanners):
                 break
 
-    def get_beacons_for_scanner(scanner: Scanner) -> List[Coords]:
-        def inner(scanner, processed) -> List[Coords]:
+    def get_beacons_and_scanner_positions(
+        scanner: Scanner,
+    ) -> Tuple[List[Coords], List[Coords]]:
+        def inner(scanner, processed) -> Tuple[List[Coords], List[Coords]]:
+            scanner_positions = [Coords(0, 0, 0)]
             beacons = copy.copy(scanner.beacons)
             processed.add(scanner)
             for other_scanner, fn_i, translation in mappings[scanner]:
                 if other_scanner in processed:
                     continue
-                other_scanner_beacons = inner(other_scanner, processed)
+                other_scanner_beacons, other_scanner_positions = inner(
+                    other_scanner, processed
+                )
                 beacons.extend(
                     Scanner.get_beacons_relative(
                         fn_i, translation, other_scanner_beacons
                     )
                 )
-            return beacons
-
-        return list(set(inner(scanner, set())))
-
-    def get_scanner_positions(scanner: Scanner) -> List[Coords]:
-        def inner(scanner, processed) -> List[Coords]:
-            scanner_positions = [Coords(0, 0, 0)]
-            processed.add(scanner)
-            for other_scanner, fn_i, translation in mappings[scanner]:
-                if other_scanner in processed:
-                    continue
-                other_scanner_positions = inner(other_scanner, processed)
                 scanner_positions.extend(
                     Scanner.get_beacons_relative(
                         fn_i, translation, other_scanner_positions
                     )
                 )
-            return scanner_positions
+            return beacons, scanner_positions
 
-        return list(set(inner(scanner, set())))
+        beacons, scanners = inner(scanner, set())
+        return list(set(beacons)), scanners
 
-    beacons = get_beacons_for_scanner(scanners[0])
+    beacons, scanner_positions = get_beacons_and_scanner_positions(scanners[0])
     print(f"number of beacons = {len(beacons)}")
 
     def manhattan_distance(coords_a: Coords, coords_b: Coords) -> int:
@@ -184,7 +178,6 @@ def main():
             + abs(coords_a.z - coords_b.z)
         )
 
-    scanner_positions = get_scanner_positions(scanners[0])
     largest_distance = 0
     for s_a, s_b in combinations(scanner_positions, 2):
         distance = manhattan_distance(s_a, s_b)
