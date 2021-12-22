@@ -14,9 +14,10 @@ class PixelOutOfBounds(Exception):
 
 
 class Image(Iterator):
-    def __init__(self):
+    def __init__(self, default: int = 0):
         self._grid = []  # type: list[list[Pixel]]
         self._curr_pixel = None
+        self.default = default
 
     def add_pixels(self, row: list[int]) -> Image:
         row_i = len(self._grid)
@@ -89,12 +90,12 @@ class Image(Iterator):
 
     def _get_pixel(self, row_i: int, column_i: int) -> Pixel:
         if row_i < 0 or column_i < 0:
-            pixel = Pixel(row=row_i, column=column_i, bit=0)
+            pixel = Pixel(row=row_i, column=column_i, bit=self.default)
         else:
             try:
                 pixel = self._grid[row_i][column_i]
             except IndexError:
-                pixel = Pixel(row=row_i, column=column_i, bit=0)
+                pixel = Pixel(row=row_i, column=column_i, bit=self.default)
         return pixel
 
     def display(self) -> str:
@@ -122,7 +123,12 @@ def process_image(input_image: Image, algorithm: str) -> Image:
             row=pixel.row, column=pixel.column, bit=0 if algorithm[index] == "." else 1
         )
         pixels.append(new_pixel)
-    return Image().set_pixels(pixels)
+    default = 0
+    if input_image.default == 0 and algorithm[0] == "#" :
+        default = 1
+    elif input_image.default == 1 and algorithm[-1] == "." :
+        default = 0
+    return Image(default=default).set_pixels(pixels)
 
 
 def main():
@@ -141,6 +147,11 @@ def main():
     output_image_2 = process_image(output_image_1, algorithm)
     print(output_image_2.display())
     print(len(output_image_2.get_pixels_lit_up()))
+
+    output_image = output_image_2
+    for i in range(48):
+        output_image = process_image(output_image, algorithm)
+    print(len(output_image.get_pixels_lit_up()))
 
 
 main()
