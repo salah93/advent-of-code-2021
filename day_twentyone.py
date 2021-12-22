@@ -13,15 +13,23 @@ class Dice(object):
         self.number_of_times_rolled = 0
         self.sides = sides
 
-    def roll_dice(self) -> int:
+    def roll(self) -> int:
         self.number_of_times_rolled += 1
         return random.randint(1, self.sides)
 
 
 class DeterminisiticDice(Dice):
-    def roll_dice(self):
-        super().roll_dice()
+    def roll(self):
+        super().roll()
         return (self.number_of_times_rolled % self.sides) or self.sides
+
+
+class DiracDice(Dice):
+    def __init__(self):
+        super().__init__(3)
+
+    def roll(self):
+        super().roll()
 
 
 class GameBoard(object):
@@ -30,14 +38,16 @@ class GameBoard(object):
         self.winning_threshold = winning_threshold
 
     def roll_dice(self, player: Player, dice: Dice) -> bool:
-        paces = 0
-        for i in range(3):
-            paces += dice.roll_dice()
-        player.curr_position = (
-            (player.curr_position + paces) % self.board_length
-        ) or self.board_length
-        player.score += player.curr_position
-        return player.score >= self.winning_threshold
+        def inner(times_left: int, paces: int) -> bool:
+            if times_left > 0:
+                return inner(times_left - 1, paces + dice.roll())
+            player.curr_position = (
+                (player.curr_position + paces) % self.board_length
+            ) or self.board_length
+            player.score += player.curr_position
+            return player.score >= self.winning_threshold
+
+        return inner(3, 0)
 
 
 def main():
