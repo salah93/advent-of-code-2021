@@ -49,36 +49,101 @@ class GameBoard(object):
 
         return inner(3, 0)
 
-    def roll_dice_dirac(self, player: Player) -> List[Player]:
-        def inner(player: Player, times_left: int, paces: int) -> List[Player]:
-            if times_left > 0:
-                player_outcomes = inner(
-                    Player(player.id, player.score, player.curr_position),
-                    times_left - 1,
-                    paces + 1,
-                )
-                player_outcomes += inner(
-                    Player(player.id, player.score, player.curr_position),
-                    times_left - 1,
-                    paces + 2,
-                )
-                player_outcomes += inner(
-                    Player(player.id, player.score, player.curr_position),
-                    times_left - 1,
-                    paces + 3,
-                )
-                return player_outcomes
-
-            curr_position = (player.curr_position + paces) % self.board_length
-            return [
+    def roll_dice_dirac(self, player: Player) -> list[Player]:
+        return (
+            [
                 Player(
                     player.id,
-                    player.score + curr_position,
-                    curr_position,
-                )
+                    player.score
+                    + (
+                        ((player.curr_position + 3) % self.board_length)
+                        or self.board_length
+                    ),
+                    player.curr_position + 3,
+                ),
             ]
-
-        return inner(player, 3, 0)
+            + (
+                [
+                    Player(
+                        player.id,
+                        player.score
+                        + (
+                            ((player.curr_position + 4) % self.board_length)
+                            or self.board_length
+                        ),
+                        player.curr_position + 4,
+                    ),
+                ]
+                * 3
+            )
+            + (
+                [
+                    Player(
+                        player.id,
+                        player.score
+                        + (
+                            ((player.curr_position + 5) % self.board_length)
+                            or self.board_length
+                        ),
+                        player.curr_position + 5,
+                    ),
+                ]
+                * 6
+            )
+            + (
+                [
+                    Player(
+                        player.id,
+                        player.score
+                        + (
+                            ((player.curr_position + 6) % self.board_length)
+                            or self.board_length
+                        ),
+                        player.curr_position + 6,
+                    ),
+                ]
+                * 7
+            )
+            + (
+                [
+                    Player(
+                        player.id,
+                        player.score
+                        + (
+                            ((player.curr_position + 7) % self.board_length)
+                            or self.board_length
+                        ),
+                        player.curr_position + 7,
+                    ),
+                ]
+                * 6
+            )
+            + (
+                [
+                    Player(
+                        player.id,
+                        player.score
+                        + (
+                            ((player.curr_position + 8) % self.board_length)
+                            or self.board_length
+                        ),
+                        player.curr_position + 8,
+                    ),
+                ]
+                * 3
+            )
+            + [
+                Player(
+                    player.id,
+                    player.score
+                    + (
+                        ((player.curr_position + 9) % self.board_length)
+                        or self.board_length
+                    ),
+                    player.curr_position + 9,
+                ),
+            ]
+        )
 
 
 # def get_wins_dirac(
@@ -109,25 +174,32 @@ def get_wins_dirac(
     game: GameBoard,
     player_one: Player,
     player_two: Player,
-    player_one_wins: int = 0,
-    player_two_wins: int = 0,
+    cache: dict[tuple[Player, Player], tuple[int, int]] = None,
 ):
+    cache = cache or {}
+    player_one_wins = 0
+    player_two_wins = 0
     player_one_outcomes = game.roll_dice_dirac(player_one)
     for p1 in player_one_outcomes:
-        if p1.score >= 21:
+        if p1.score >= game.winning_threshold:
             player_one_wins += 1
         else:
             for p2 in game.roll_dice_dirac(player_two):
-                if p2.score >= 21:
+                if p2.score >= game.winning_threshold:
                     player_two_wins += 1
                 else:
-                    player_one_wins, player_two_wins = get_wins_dirac(
-                        game,
-                        p1,
-                        p2,
-                        player_one_wins,
-                        player_two_wins,
-                    )
+                    if (p1, p2) in cache:
+                        result = cache[(p1, p2)]
+                    else:
+                        result = get_wins_dirac(
+                            game,
+                            p1,
+                            p2,
+                            cache,
+                        )
+                        cache[(p1, p2)] = result
+                    player_one_wins += result[0]
+                    player_two_wins += result[1]
     return player_one_wins, player_two_wins
 
 
