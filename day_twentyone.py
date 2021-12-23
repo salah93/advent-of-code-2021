@@ -42,10 +42,13 @@ class GameBoard(object):
         def inner(times_left: int, paces: int) -> Player:
             if times_left > 0:
                 return inner(times_left - 1, paces + dice.roll())
-            curr_position = (
-                (player.curr_position + paces) % self.board_length
-            ) or self.board_length
-            return Player(player.id, player.score + curr_position, curr_position)
+            curr_position = player.curr_position + paces
+            return Player(
+                player.id,
+                player.score
+                + ((curr_position % self.board_length) or self.board_length),
+                curr_position,
+            )
 
         return inner(3, 0)
 
@@ -146,30 +149,6 @@ class GameBoard(object):
         )
 
 
-# def get_wins_dirac(
-#    game: GameBoard,
-#    player_one_outcomes: list[Player],
-#    player_two_outcomes: list[Player],
-#    player_one_wins: int = 0,
-#    player_two_wins: int = 0,
-# ):
-#    for p1 in player_one_outcomes:
-#        for p2 in player_two_outcomes:
-#            if p1.score >= 21:
-#                player_one_wins += 1
-#            elif p2.score >= 21:
-#                player_two_wins += 1
-#            else:
-#                player_one_wins, player_two_wins = get_wins_dirac(
-#                    game,
-#                    game.roll_dice_dirac(p1),
-#                    game.roll_dice_dirac(p2),
-#                    player_one_wins,
-#                    player_two_wins,
-#                )
-#    return player_one_wins, player_two_wins
-#
-#
 def get_wins_dirac(
     game: GameBoard,
     player_one: Player,
@@ -204,7 +183,7 @@ def get_wins_dirac(
 
 
 def main():
-    with open("data/game_test.txt") as f:
+    with open("data/game.txt") as f:
         player_one_curr_position = int(next(f).split(":")[1])
         player_two_curr_position = int(next(f).split(":")[1])
     player_one = Player(1, 0, player_one_curr_position)
@@ -212,11 +191,13 @@ def main():
 
     # game = GameBoard()
     # dice = DeterminisiticDice(100)
-    # curr_player = player_one
+    # game_over = False
     # while not game_over:
-    #    curr_player = game.roll_dice(curr_player, dice):
-    #    game_over = curr_player.score >= 100
-    #    curr_player = player_one if curr_player == player_two else player_two
+    #    player_one = game.roll_dice(player_one, dice)
+    #    game_over = player_one.score >= game.winning_threshold
+    #    if not game_over:
+    #        player_two = game.roll_dice(player_two, dice)
+    #        game_over = player_two.score >= game.winning_threshold
 
     # print(f"number of times rolled = {dice.number_of_times_rolled}")
     # print(f"player one scored {player_one.score}")
